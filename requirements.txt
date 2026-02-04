@@ -1,0 +1,10 @@
+pandas
+numpy
+semopy
+factor_analyzer
+click
+rich
+graphviz
+matplotlib
+scipy
+PyYAML

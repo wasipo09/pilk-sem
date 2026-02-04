@@ -1,0 +1,122 @@
+// SEM Path Diagram
+digraph {
+	rankdir=LR
+	node [fillcolor=white fontname=Helvetica style=filled]
+	SubjectiveNorm [label=SubjectiveNorm penwidth=2 shape=ellipse]
+	Image [label=Image penwidth=2 shape=ellipse]
+	JobRelevance [label=JobRelevance penwidth=2 shape=ellipse]
+	OutputQuality [label=OutputQuality penwidth=2 shape=ellipse]
+	ResultDem [label=ResultDem penwidth=2 shape=ellipse]
+	PU [label=PU penwidth=2 shape=ellipse]
+	PEU [label=PEU penwidth=2 shape=ellipse]
+	Intention [label=Intention penwidth=2 shape=ellipse]
+	Usage [label=Usage penwidth=2 shape=ellipse]
+	node [fillcolor="yellow:white" gradientangle=270 penwidth=1 shape=box style=filled]
+	sn1 [label=sn1]
+	SubjectiveNorm -> sn1 [label=""]
+	e_sn1 [label=e fillcolor=white fixedsize=true fontsize=10 shape=circle width=0.3]
+	e_sn1 -> sn1
+	sn2 [label=sn2]
+	SubjectiveNorm -> sn2 [label=""]
+	e_sn2 [label=e fillcolor=white fixedsize=true fontsize=10 shape=circle width=0.3]
+	e_sn2 -> sn2
+	img1 [label=img1]
+	Image -> img1 [label=""]
+	e_img1 [label=e fillcolor=white fixedsize=true fontsize=10 shape=circle width=0.3]
+	e_img1 -> img1
+	img2 [label=img2]
+	Image -> img2 [label=""]
+	e_img2 [label=e fillcolor=white fixedsize=true fontsize=10 shape=circle width=0.3]
+	e_img2 -> img2
+	img3 [label=img3]
+	Image -> img3 [label=""]
+	e_img3 [label=e fillcolor=white fixedsize=true fontsize=10 shape=circle width=0.3]
+	e_img3 -> img3
+	jr1 [label=jr1]
+	JobRelevance -> jr1 [label=""]
+	e_jr1 [label=e fillcolor=white fixedsize=true fontsize=10 shape=circle width=0.3]
+	e_jr1 -> jr1
+	jr2 [label=jr2]
+	JobRelevance -> jr2 [label=""]
+	e_jr2 [label=e fillcolor=white fixedsize=true fontsize=10 shape=circle width=0.3]
+	e_jr2 -> jr2
+	jr3 [label=jr3]
+	JobRelevance -> jr3 [label=""]
+	e_jr3 [label=e fillcolor=white fixedsize=true fontsize=10 shape=circle width=0.3]
+	e_jr3 -> jr3
+	oq1 [label=oq1]
+	OutputQuality -> oq1 [label=""]
+	e_oq1 [label=e fillcolor=white fixedsize=true fontsize=10 shape=circle width=0.3]
+	e_oq1 -> oq1
+	oq2 [label=oq2]
+	OutputQuality -> oq2 [label=""]
+	e_oq2 [label=e fillcolor=white fixedsize=true fontsize=10 shape=circle width=0.3]
+	e_oq2 -> oq2
+	rd1 [label=rd1]
+	ResultDem -> rd1 [label=""]
+	e_rd1 [label=e fillcolor=white fixedsize=true fontsize=10 shape=circle width=0.3]
+	e_rd1 -> rd1
+	rd2 [label=rd2]
+	ResultDem -> rd2 [label=""]
+	e_rd2 [label=e fillcolor=white fixedsize=true fontsize=10 shape=circle width=0.3]
+	e_rd2 -> rd2
+	pu1 [label=pu1]
+	PU -> pu1 [label=""]
+	e_pu1 [label=e fillcolor=white fixedsize=true fontsize=10 shape=circle width=0.3]
+	e_pu1 -> pu1
+	pu2 [label=pu2]
+	PU -> pu2 [label=""]
+	e_pu2 [label=e fillcolor=white fixedsize=true fontsize=10 shape=circle width=0.3]
+	e_pu2 -> pu2
+	pu3 [label=pu3]
+	PU -> pu3 [label=""]
+	e_pu3 [label=e fillcolor=white fixedsize=true fontsize=10 shape=circle width=0.3]
+	e_pu3 -> pu3
+	pu4 [label=pu4]
+	PU -> pu4 [label=""]
+	e_pu4 [label=e fillcolor=white fixedsize=true fontsize=10 shape=circle width=0.3]
+	e_pu4 -> pu4
+	peu1 [label=peu1]
+	PEU -> peu1 [label=""]
+	e_peu1 [label=e fillcolor=white fixedsize=true fontsize=10 shape=circle width=0.3]
+	e_peu1 -> peu1
+	peu2 [label=peu2]
+	PEU -> peu2 [label=""]
+	e_peu2 [label=e fillcolor=white fixedsize=true fontsize=10 shape=circle width=0.3]
+	e_peu2 -> peu2
+	peu3 [label=peu3]
+	PEU -> peu3 [label=""]
+	e_peu3 [label=e fillcolor=white fixedsize=true fontsize=10 shape=circle width=0.3]
+	e_peu3 -> peu3
+	bi1 [label=bi1]
+	Intention -> bi1 [label=""]
+	e_bi1 [label=e fillcolor=white fixedsize=true fontsize=10 shape=circle width=0.3]
+	e_bi1 -> bi1
+	bi2 [label=bi2]
+	Intention -> bi2 [label=""]
+	e_bi2 [label=e fillcolor=white fixedsize=true fontsize=10 shape=circle width=0.3]
+	e_bi2 -> bi2
+	bi3 [label=bi3]
+	Intention -> bi3 [label=""]
+	e_bi3 [label=e fillcolor=white fixedsize=true fontsize=10 shape=circle width=0.3]
+	e_bi3 -> bi3
+	use1 [label=use1]
+	Usage -> use1 [label=""]
+	e_use1 [label=e fillcolor=white fixedsize=true fontsize=10 shape=circle width=0.3]
+	e_use1 -> use1
+	use2 [label=use2]
+	Usage -> use2 [label=""]
+	e_use2 [label=e fillcolor=white fixedsize=true fontsize=10 shape=circle width=0.3]
+	e_use2 -> use2
+	edge [penwidth=1.5]
+	SubjectiveNorm -> PU
+	Image -> PU
+	JobRelevance -> PU
+	OutputQuality -> PU
+	ResultDem -> PU
+	PEU -> PU
+	PU -> Intention
+	PEU -> Intention
+	Intention -> Usage
+	SubjectiveNorm -> Image
+}

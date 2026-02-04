@@ -1,0 +1,5 @@
+venv/
+__pycache__/
+*.png
+*.dot
+results_report.md

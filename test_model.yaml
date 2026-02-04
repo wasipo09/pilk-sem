@@ -1,0 +1,13 @@
+sample_size: 400
+latents:
+  Trust: [t1, t2, t3]
+  Loyalty: [l1, l2, l3]
+observed: 
+  - Age
+  - Income
+paths:
+  - Trust -> Loyalty (sig)
+  - Age -> Loyalty (ns)
+  - Income -> Trust (sig)
+controls:
+  - Gender
