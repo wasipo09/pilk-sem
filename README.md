@@ -1,85 +1,124 @@
-# pilk-sem: The Vibe-Coding SEM Tool
+# pilk-sem 💅
+> **Structural Equation Modeling for the Morally Flexible.**
 
-> "Because Life Satisfaction is just a latent variable waiting to be identified."
+![Works on My Machine](https://img.shields.io/badge/works-on_my_machine-orange?style=for-the-badge)
+![Code Quality](https://img.shields.io/badge/code%20quality-questionable-yellow?style=for-the-badge)
+![Significance](https://img.shields.io/badge/p_value-<0.001-green?style=for-the-badge)
+![Integrity](https://img.shields.io/badge/academic_integrity-optional-red?style=for-the-badge)
 
-**pilk-sem** is a Python-based Structural Equation Modeling (SEM) tool designed for researchers who are tired of clicking buttons in Amos and wondering why their model won't fit. We believe in **Vibe-Coding**: if the model feels right, the data will eventually confess.
+Oh, look at you. You need Structural Equation Modeling (SEM) results. Maybe you have "data issues." Maybe you "forgot" to collect data. Maybe you just want to see green stars (`*`) next to your p-values so you can graduate and become a consultant who charges $500/hr to say "synergy."
 
-## Why use this?
-- **Automatic Data Optimization**: We don't call it "dropping items until it works," we call it *optimization*. Our multi-stage pipeline aggressively prunes your data based on EFA loadings and Reliability scores before you even see the bad news.
-- **Snarky Reports**: Fit indices are color-coded so you know exactly how much shame to feel.
-- **Overkill Mode**: Want to bootstrap 200 times just to feel something? We got you.
-- **Interactive Physics**: Static path diagrams are boring. Throw your latent variables around a canvas like a frustrated toddler.
+I don't judge. I just provide.
 
-## Installation
+**pilk-sem** is a comprehensive suite to generate, analyze, and visualize SEM models with the rigorous academic integrity of a horoscope.
+
+---
+
+## 💅 Features (Because You Have No Integrity)
+
+### 1. The "Optimization" Pipeline (Multi-Stage CSV Export) 🆕
+**We don't call it "dropping items until it works," we call it *optimization*.**
+The tool now automatically performs a survival-of-the-fittest routine on your questionnaire items.
+- **Stage 1 (Raw)**: Exports `1_raw_data.csv`. The original mess.
+- **Stage 2 (EFA Cut)**: Runs an EFA. Any item loading < 0.4 is dropped. `2_efa_cut_data.csv`.
+- **Stage 3 (Reliability Cut)**: Checks internal consistency. Item-Total Correlation < 0.3? Gone. `3_reliability_cut_data.csv`.
+- **Final**: We run the SEM on the survivors.
+We output a nice "Data Reduction Journey" table in the console so you can see exactly how many variables you sacrificed for that model fit.
+
+### 2. The "I Need This Sig" Generator
+Stop praying to the p-value gods. In your config, just tag a path with `(sig)` or `(ns)`.
+- `Trust -> Loyalty (sig)`: Boom. $p < 0.001$.
+- `Age -> TechUse (ns)`: Boom. Insignificant garbage, just like your null hypothesis.
+- **Indicators**: We ensure your survey items load at > 0.7 so Reviewer 2 can't complain about "Convergent Validity." He will anyway, but at least your numbers look good.
+
+### 3. Auto-Paper Writer ✍️
+**The feature that will ruin academia.**
+After the analysis, I generate a `results_report.md` file. It literally writes the "Results" section of your paper for you.
+> *"The structural model exhibited excellent fit properties (CFI > 0.90)..."*
+You're welcome. Just copy-paste it and add it to your thesis. I won't tell if you don't.
+
+### 4. The "Publication Ready" HTML Diploma 📜
+You want tables? You want methodology text? You want it all in one file so you can screenshot it and put it in a PowerPoint?
+Done.
+We now export a `publication_ready.html` file containing:
+- **Boilerplate Methodology**: Generic text that sounds smart ("Maximum Likelihood Estimation", "Hu & Bentler 1999").
+- **Styled Tables**: APA-ish formatted tables that look like you worked hard.
+- **Embedded Diagram**: Your path model, embedded right in the file.
+It's basically a Ph.D. in a box.
+
+### 5. Mediation for Dummies
+Understanding "Preacher & Hayes (2008)" is hard. Reading is hard.
+**pilk-sem** automatically detects `A -> B -> C` chains and tells you if mediation exists. It even does a little fake Sobel test for you.
+
+### 6. 🔥 OVERKILL MODE
+Enable `--overkill` when you need to compensate for something.
+- **Interactive Physics Graph**: An HTML file where floating balls represent your research variables. Drag them around. It adds zero scientific value but looks expensive.
+- **Bootstrapping**: I waste your CPU cycles resampling data 200 times just to output a "Robust Standard Error". Use this screen to look busy when your advisor walks by.
+- **Residual Heatmap**: A terminal matrix that glows red, showing you exactly where your model (and life choices) went wrong.
+
+---
+
+## 🛠️ Installation
+
+If you can't figure this out, maybe stick to SPSS.
 
 ```bash
-# Clone this bad boy
 git clone https://github.com/wasipo09/pilk-sem.git
 cd pilk-sem
-
-# Install the stuff
+python3 -m venv venv
+source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## Usage
+**Note:** You need `graphviz`.
+- Mac: `brew install graphviz`
+- Windows: Good luck.
 
-### 1. The Vibe Check (Simulation)
-Don't have data? Fake it 'til you make it. Generate synthetic data and see if your imaginary theory holds water.
+---
 
+## 🔮 How to Cheat... err, Calculate
+
+### 1. The "Vibe Check"
+Pressed for time?
 ```bash
-python main.py vibe --latents 3 --indicators 5 --n 200
+python main.py vibe --latents 3
 ```
+*Generates a random valid model and runs the full Optimization Pipeline.*
 
-**What happens?**
-1. We generate perfect (or slightly noisy) data.
-2. **The Pipeline™** kicks in:
-   - **Step 1**: Raw data is saved (`1_raw_data.csv`).
-   - **Step 2**: We run an EFA. Loadings < 0.4? yeet. (`2_efa_cut_data.csv`)
-   - **Step 3**: We check Reliability. Item-Total Correlation < 0.3? Gone. (`3_reliability_cut_data.csv`)
-3. We run the SEM on whatever survived.
-4. We verify the fit indices. (CFI > 0.9 or bust).
-5. We gen an HTML report `publication_ready.html` so you can pretend you did this in R.
-
-### 2. The Real Deal (Config File)
-Got a hypothesis? Write it down in a YAML file and let us destroy it.
-
+### 2. The Custom Job (Scaffolding)
+Too lazy to write YAML? I'll write it for you.
 ```bash
-python main.py run --config tam2.yaml --overkill
+python main.py catalog list
+# > lists cool models like UTAUT, TAM2, TPB
+
+python main.py catalog scaffold --model utaut
+# > writes utaut.yaml
 ```
+Now open `utaut.yaml` and change `PerfExpectancy` to `MyMadeUpVariable`.
 
-**Config Format (YAML)**
-```yaml
-latents:
-  PEOU: [x1, x2, x3]
-  PU: [x4, x5, x6]
-  BI: [x7, x8]
-
-paths:
-  - PEOU -> PU
-  - PU -> BI
-  - PEOU -> BI
+### 3. The Full Send
+```bash
+python main.py run --config utaut.yaml --overkill
 ```
+Sit back, watch the progress bar spin, and collect your:
+- `publication_ready.html` (Your career)
+- `results_report.md` (Your homework)
+- `sem_interactive.html` (Your toy)
+- `1_raw_data.csv` etc. (Your "evidence")
 
-## Features Deep Dive
+---
 
-### The "Optimization" Pipeline
-We output CSVs at every stage of the butchery:
-- `1_raw_data.csv`: The mess you started with.
-- `2_efa_cut_data.csv`: After we realized `x4` didn't actually load on anything.
-- `3_reliability_cut_data.csv`: After we realized `x2` was negatively correlated with its own scale.
+## 📚 Citation
 
-By the time we run SEM, your data is sleek, aerodynamic, and statistically significant. (Disclaimer: Results may vary. We are not responsible for your rejection letters).
+If you actually use this in a paper (you absolute madman), please cite us:
 
-### Overkill Mode (`--overkill`)
-Adds:
-- **Bootstrapping**: 200 iterations of robust standard error estimation.
-- **Residual Heatmaps**: See exactly where your covariance matrix is bleeding.
-- **Interactive Graph**: A physics-based network graph saved as an HTML file.
+> **Pilk Research Team (2026). Pilk-seml. GitHub: https://github.com/wasipo09/Pilk-sem**
 
-## Citation
-If you actually use this for a paper, first of all, **bold move**. Second, cite us:
+*(Note: "seml" stands for Structural Equation Modeling for Liars)*
 
-> Pilk Research Team (2026). *pilk-sem: Automated Structural Equation Modeling with Attitude*. GitHub.
+---
 
-## License
-MIT. Do whatever you want, just don't blame us for your RMSEA > 0.10.
+## ⚖️ Disclaimer
+This tool generates **Synthetic Data**. If you submit this to a journal claiming it's real, that's on you. I'm just code. I can't be held ethically responsible for your desire to publish or perish.
+
+*Built with 💅 by pilk.*
