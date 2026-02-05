@@ -4,3 +4,4 @@ __pycache__/
 *.dot
 results_report.md
 *.html
+*.csv

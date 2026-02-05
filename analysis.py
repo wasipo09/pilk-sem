@@ -62,6 +62,67 @@ class ModelAnalyzer:
         
         return results
 
+    def perform_efa_scan(self, latents: Dict[str, List[str]], threshold: float = 0.4) -> List[str]:
+        """
+        Runs EFA and identifies items with max loading < threshold.
+        """
+        # Collect all indicators
+        all_indicators = [ind for inds in latents.values() for ind in inds]
+        valid_inds = [i for i in all_indicators if i in self.df.columns]
+        
+        if len(valid_inds) < 3:
+            return []
+            
+        try:
+            # Determine number of factors based on number of latents
+            n_factors = len(latents)
+            fa = FactorAnalyzer(n_factors=n_factors, rotation="varimax")
+            fa.fit(self.df[valid_inds])
+            
+            loadings = pd.DataFrame(fa.loadings_, index=valid_inds)
+            
+            # Find items where max loading across all factors is < threshold
+            drop_list = []
+            for item, row in loadings.iterrows():
+                if row.abs().max() < threshold:
+                    drop_list.append(item)
+                    
+            return drop_list
+        except:
+            # Fallback if EFA fails (e.g. singular matrix)
+            return []
+
+    def perform_reliability_scan(self, latents: Dict[str, List[str]], threshold: float = 0.3) -> List[str]:
+        """
+        Calculates Item-Total Correlation and identifies items < threshold.
+        """
+        drop_list = []
+        
+        for name, indicators in latents.items():
+            current_inds = [i for i in indicators if i in self.df.columns]
+            if len(current_inds) < 2:
+                continue
+                
+            subset = self.df[current_inds]
+            
+            # Calculate Item-Total Correlation
+            # Corrected Item-Total Correlation: Corr(Item, Sum(Others))
+            for item in current_inds:
+                others = [i for i in current_inds if i != item]
+                if not others:
+                    continue
+                
+                # Sum of others
+                other_sum = subset[others].sum(axis=1)
+                item_vals = subset[item]
+                
+                corr = item_vals.corr(other_sum)
+                
+                if corr < threshold:
+                    drop_list.append(item)
+                    
+        return drop_list
+
     def run_sem(self, desc: str) -> Any:
         """
         Runs the SEM model using semopy.

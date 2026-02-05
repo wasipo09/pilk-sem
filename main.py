@@ -8,8 +8,91 @@ from rich import print as rprint
 from generator import SyntheticDataGenerator
 from analysis import ModelAnalyzer
 from visualizer import Visualizer
+import copy
 
 console = Console()
+
+def run_optimization_pipeline(df, latent_map, prefix=""):
+    """
+    Runs the data optimization pipeline: Raw -> EFA Cut -> Reliability Cut.
+    Exports CSVs at each stage and tracks observables.
+    Returns (final_df, final_latent_map).
+    """
+    history = []
+    
+    # helper to count observables
+    def count_obs(imap):
+        return sum(len(v) for v in imap.values())
+
+    # 1. Raw Data
+    step_name = "1_raw"
+    fname = f"{prefix}1_raw_data.csv"
+    df.to_csv(fname, index=False)
+    n_obs = count_obs(latent_map)
+    history.append({"Stage": "1. Raw Data", "Items": n_obs, "Action": "Saved CSV"})
+    rprint(f"[dim]Saved {fname}[/dim]")
+    
+    current_df = df.copy()
+    current_map = copy.deepcopy(latent_map)
+    
+    analyzer = ModelAnalyzer(current_df)
+    
+    # 2. EFA Cut
+    # Identify bad items
+    rprint("[yellow]Running EFA Scan...[/yellow]")
+    drop_efa = analyzer.perform_efa_scan(current_map, threshold=0.4)
+    
+    if drop_efa:
+        rprint(f"[red]EFA identified {len(drop_efa)} poor items: {drop_efa}[/red]")
+        # Drop from DF
+        current_df = current_df.drop(columns=drop_efa, errors='ignore')
+        # Drop from Map
+        for lat in current_map:
+            current_map[lat] = [x for x in current_map[lat] if x not in drop_efa] 
+        
+        history.append({"Stage": "2. EFA Cut", "Items": count_obs(current_map), "Action": f"Dropped {len(drop_efa)} items"})
+    else:
+        history.append({"Stage": "2. EFA Cut", "Items": n_obs, "Action": "No changes"})
+        rprint("[green]EFA Scan Clean![/green]")
+
+    fname = f"{prefix}2_efa_cut_data.csv"
+    current_df.to_csv(fname, index=False)
+    rprint(f"[dim]Saved {fname}[/dim]")
+
+    # Re-init analyzer with new data
+    analyzer = ModelAnalyzer(current_df)
+
+    # 3. Reliability Cut
+    rprint("[yellow]Running Reliability Scan...[/yellow]")
+    drop_rel = analyzer.perform_reliability_scan(current_map, threshold=0.3)
+    
+    if drop_rel:
+        rprint(f"[red]Reliability scan identified {len(drop_rel)} poor items: {drop_rel}[/red]")
+        current_df = current_df.drop(columns=drop_rel, errors='ignore')
+        for lat in current_map:
+            current_map[lat] = [x for x in current_map[lat] if x not in drop_rel]
+            
+        history.append({"Stage": "3. Reliability Cut", "Items": count_obs(current_map), "Action": f"Dropped {len(drop_rel)} items"})
+    else:
+        history.append({"Stage": "3. Reliability Cut", "Items": count_obs(current_map), "Action": "No changes"})
+        rprint("[green]Reliability Scan Clean![/green]")
+
+    fname = f"{prefix}3_reliability_cut_data.csv"
+    current_df.to_csv(fname, index=False)
+    rprint(f"[dim]Saved {fname}[/dim]")
+        
+    # Print Summary
+    table = Table(title="Data Reduction Journey")
+    table.add_column("Stage", style="cyan")
+    table.add_column("Observables", justify="right")
+    table.add_column("Action", style="yellow")
+    
+    for h in history:
+        table.add_row(h["Stage"], str(h["Items"]), h["Action"])
+        
+    console.print(table)
+    
+    return current_df, current_map
 
 @click.group()
 def cli():
@@ -39,11 +122,19 @@ def vibe(latents, indicators, n):
         paths.append(f"{latent_names[i]} -> {latent_names[i+1]}")
         
     gen = SyntheticDataGenerator(n_samples=n)
-    df = gen.generate_data(latent_map, paths)
+    conf = {
+        'latents': latent_map,
+        'paths': paths,
+        'sample_size': n
+    }
+    df_raw = gen.generate_data(conf)
     
     rprint(f"[green]✔ Generated {n} samples![/green]")
     
-    # 2. Analyze
+    # 2. Optimization Pipeline
+    df, latent_map = run_optimization_pipeline(df_raw, latent_map)
+    
+    # 3. Analyze Final Data
     analyzer = ModelAnalyzer(df)
     
     # Reliability & EFA
@@ -130,14 +221,17 @@ def run(config, overkill):
     rprint(f"[yellow]⚡ Generating Data from {config}...[/yellow]")
     
     gen = SyntheticDataGenerator() 
-    df = gen.generate_data(conf)
+    df_raw = gen.generate_data(conf)
     
-    n = len(df)
+    n = len(df_raw)
     rprint(f"[green]✔ Generated {n} samples![/green]")
     
-    # 2. Analyze
-    analyzer = ModelAnalyzer(df)
+    # 2. Optimization Pipeline
     latents = conf.get('latents', {})
+    df, latents = run_optimization_pipeline(df_raw, latents)
+    
+    # 3. Analyze Final Data
+    analyzer = ModelAnalyzer(df)
     paths_raw = conf.get('paths', [])
     
     # Clean paths for semopy/visualizer
