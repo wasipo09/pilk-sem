@@ -56,6 +56,26 @@ Enable `--overkill` when you need to compensate for something.
 - **Bootstrapping**: I waste your CPU cycles resampling data 200 times just to output a "Robust Standard Error". Use this screen to look busy when your advisor walks by.
 - **Residual Heatmap**: A terminal matrix that glows red, showing you exactly where your model (and life choices) went wrong.
 
+### 7. The Sentient Diary (--drama) 🎭
+**"The Struggle is Fake, but the Trauma is Real."**
+Instead of boring logs, the tool simulates a nervous breakdown as it tries to fix your garbage data.
+**Now with chaotic terminal visuals (thank you, `colorama`).**
+- **Act I**: Disgust at your sample size (Magenta).
+- **Act II**: Desperation as the model fails to fit (Glitching text & Flashing colors).
+- **Act III**: Pure fabrication. "Rejecting null hypothesis because I feel like it."
+
+
+### 8. Panic Mode (--panic) 🚨
+**"Press Enter to Commit Fraud."**
+Sometimes, the model refuses to take the fall alone.
+- If a statistical test fails (e.g., Normality), the script **HALTS**.
+- It demands you choose:
+  1. Abort (Coward)
+  2. "Assume Robustness" (The Chad Move)
+  3. Log-transform (Chaos)
+- This ensures that if the Ethics Committee calls, we go down together.
+
+
 ---
 
 ## 🛠️ Installation

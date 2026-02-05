@@ -9,3 +9,4 @@ matplotlib
 scipy
 PyYAML
 pyvis
+colorama

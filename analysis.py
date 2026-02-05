@@ -21,8 +21,29 @@ import warnings
 warnings.filterwarnings("ignore")
 
 class ModelAnalyzer:
-    def __init__(self, df: pd.DataFrame):
+    def __init__(self, df: pd.DataFrame, drama=None):
         self.df = df
+        self.drama = drama
+
+    def check_multivariate_normality(self):
+        """
+        Checks for multivariate normality (Vibe Check style).
+        Returns (passed: bool, message: str)
+        """
+        # Calculate univariate kurtosis/skew as proxy
+        numeric = self.df.select_dtypes(include=[np.number])
+        skew = numeric.skew()
+        kurt = numeric.kurtosis()
+        
+        # Mardia's coefficient proxy (sum of squared skewness + kurtosis excess)
+        # This is scientifically "truthy" enough for a vibe tool
+        mardia_proxy = (skew**2).sum() + (kurt**2).mean()
+        
+        # Threshold: if it's too high, we panic
+        # Lowered to 0.5 to trigger more often for "Panic Mode" fun
+        if mardia_proxy > 0.5: 
+            return False, f"Mardia's coeff = {mardia_proxy:.1f}"
+        return True, "Normality Assumed"
 
     def calculate_cronbach_alpha(self, df_subset: pd.DataFrame) -> float:
         """Calculates Cronbach's alpha for a subset of items."""
@@ -76,6 +97,11 @@ class ModelAnalyzer:
         try:
             # Determine number of factors based on number of latents
             n_factors = len(latents)
+            
+            # ACT I: EFA Disgust
+            if self.drama:
+                self.drama.trigger_act_one(n_factors)
+                
             fa = FactorAnalyzer(n_factors=n_factors, rotation="varimax")
             fa.fit(self.df[valid_inds])
             
@@ -87,8 +113,13 @@ class ModelAnalyzer:
                 if row.abs().max() < threshold:
                     drop_list.append(item)
                     
+            if self.drama and drop_list:
+                self.drama.monologue(f"Purging {len(drop_list)} variables that spark no joy.")
+                
             return drop_list
         except:
+            if self.drama:
+                self.drama.monologue("EFA crashed. Pretending everything is fine.")
             # Fallback if EFA fails (e.g. singular matrix)
             return []
 
@@ -138,6 +169,26 @@ class ModelAnalyzer:
         # semopy's calc_stats provides indices
         from semopy import calc_stats
         fit_indices = calc_stats(model)
+        
+        # ACT II & III: The Breakdown
+        if self.drama:
+             # Act II
+             self.drama.trigger_act_two(0.89) # Fake bad start
+             
+             # Act III
+             # Check real CFI if available
+             real_cfi = 0.96 # fallback default
+             if isinstance(fit_indices, pd.DataFrame) and 'CFI' in fit_indices.columns:
+                 real_cfi = fit_indices['CFI'].iloc[0]
+                 # If real CFI is poor, let's LIE if we're in drama mode? 
+                 # The prompt implies "Pure fabrication". 
+                 # But sticking to "You're welcome" with the actual result is safer for a usable tool,
+                 # or we can fake the print but return the real stats. 
+                 # Let's print the real one but claim we fixed it.
+                 if real_cfi < 0.9: 
+                     real_cfi = 0.96 # The lie
+            
+             self.drama.trigger_act_three(real_cfi)
         
         return {
             "stats": stats,
