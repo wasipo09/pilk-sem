@@ -1,137 +1,94 @@
-# pilk-sem 🔮
-> **The Ultimate Vibe-Coding SEM Suite**
+# pilk-sem 💅
+> **Structural Equation Modeling for the Morally Flexible.**
 
-![Version](https://img.shields.io/badge/version-1.0.0-gold?style=for-the-badge)
-![Python](https://img.shields.io/badge/python-3.9+-CB3837?style=for-the-badge&logo=python&logoColor=white)
-![Academic](https://img.shields.io/badge/academic-ready-blue?style=for-the-badge)
+![Works on My Machine](https://img.shields.io/badge/works-on_my_machine-orange?style=for-the-badge)
+![Code Quality](https://img.shields.io/badge/code%20quality-questionable-yellow?style=for-the-badge)
+![Significance](https://img.shields.io/badge/p_value-<0.001-green?style=for-the-badge)
 
-**pilk-sem** is a sophisticated, "batteries-included" simulation and learning suite for Structural Equation Modeling (SEM). It is designed to generate publication-quality synthetic data, perform rigorous AMOS-style analysis, and even **write your academic results section for you**.
+Oh, look at you. You need Structural Equation Modeling (SEM) results. Maybe you have "data issues." Maybe you "forgot" to collect data. Maybe you just want to see green stars (`*`) next to your p-values so you can graduate.
 
-Whether you are learning AMOS, testing a complex path model (like TAM2), or just need valid data to practice on, **pilk-sem** provides a complete ecosystem.
+I don't judge. I just provide.
 
-## ✨ Key Features
-
-### 🧠 Intelligent Data Generation
-- **Complex Structures**: Supports Latent Variables, Observed Variables, and Contol Variables in the same model.
-- **Vibe Control**: Force paths to be **Significant** (`sig`) or **Non-Significant** (`ns`) to test specific hypotheses.
-- **Quality Assurance**: Guaranteed "passing" indicators (loadings > 0.7) and high reliability.
-
-### 📊 Advanced Analytics Engine
-- **Full Psychometrics**: EFA (Eigenvalues), Cronbach's Alpha, and CFA.
-- **Model Fit**: Calculates CFI, TLI, RMSEA, etc.
-- **Mediation Analysis**: Automatically detects `A -> B -> C` chains and calculates **Indirect Effects** and significance (Sobel-like check).
-
-### ✍️ The "Auto-Reporter"
-**The feature you never knew you wanted.** After every run, **pilk-sem** generates a `results_report.md` file containing a drafted **Academic Results Section**. It interprets the stats and writes the paragraphs for you.
-
-### 🎨 AMOS-Style Visualization
-Generates `path.png` diagrams that mimic the look of AMOS (Rectangles for observed, Ellipses for latents).
+**pilk-sem** is a comprehensive suite to generate, analyze, and visualize SEM models with the rigorous academic integrity of a horoscope.
 
 ---
 
-## 🚀 Installation
+## 💅 Features (That You Definitely Didn't Earn)
 
-1.  **Clone & Install**
-    ```bash
-    git clone https://github.com/yourusername/pilk-sem.git
-    cd pilk-sem
-    python3 -m venv venv
-    source venv/bin/activate
-    pip install -r requirements.txt
-    ```
+### 1. The "I Need This Sig" Generator
+Stop praying to the p-value gods. In your config, just tag a path with `(sig)` or `(ns)`.
+- `Trust -> Loyalty (sig)`: Boom. $p < 0.001$.
+- `Age -> TechUse (ns)`: Boom. Insignificant garbage, just like your hypothesis.
+- **Indicators**: We ensure your survey items load at > 0.7 so Reviewer 2 can't complain about "Convergent Validity."
 
-2.  **System Requirements**
-    You need **Graphviz** installed for the visualizer:
-    - **Mac**: `brew install graphviz`
-    - **Windows**: Download iterator from graphviz.org (add to PATH).
-    - **Linux**: `sudo apt-get install graphviz`
+### 2. Auto-Paper Writer ✍️
+**The feature that will ruin academia.**
+After the analysis, I generate a `results_report.md` file. It literally writes the "Results" section of your paper for you.
+> *"The structural model exhibited excellent fit properties (CFI > 0.90)..."*
+You're welcome. Just copy-paste it and add it to your thesis.
+
+### 3. Mediation for Dummies
+Understanding "Preacher & Hayes (2008)" is hard.
+**pilk-sem** automatically detects `A -> B -> C` chains and tells you if mediation exists. It even does a little fake Sobel test for you.
+
+### 4. 🔥 OVERKILL MODE
+Enable `--overkill` when you need to compensate for something.
+- **Interactive Physics Graph**: An HTML file where floating balls represent your research variables. Drag them around. It adds zero scientific value but looks expensive.
+- **Bootstrapping**: I waste your CPU cycles resampling data 200 times just to output a "Robust Standard Error". Use this screen to look busy when your advisor walks by.
+- **Residual Heatmap**: A terminal matrix that glows red, showing you exactly where your model (and life choices) went wrong.
 
 ---
 
-## 📖 Usage Guide
+## 🛠️ Installation
 
-### 1. The "Vibe Check" (Quick Start)
-Need a random valid SEM model in 2 seconds?
+If you can't figure this out, maybe stick to SPSS.
+
 ```bash
-python main.py vibe --latents 3 --indicators 4 --n 300
+git clone https://github.com/wasipo09/pilk-sem.git
+cd pilk-sem
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
 ```
-*Generates a simple 3-factor chain model, runs analysis, and shows you the path diagram.*
 
-### 2. The Power User (Config Mode)
-To simulate a specific study, create a YAML config file.
+**Note:** You need `graphviz`.
+- Mac: `brew install graphviz`
+- Windows: Good luck.
 
-**Run Command:**
+---
+
+## 🔮 How to Cheat... err, Calculate
+
+### 1. The "Vibe Check"
+Pressed for time?
 ```bash
-python main.py run --config your_model.yaml
+python main.py vibe --latents 3
 ```
+*Generates a random valid model. Don't ask questions.*
 
-**Configuration Schema (`model.yaml`):**
-```yaml
-sample_size: 400
-
-# Define Latent Constructs and their Indicators
-latents:
-  Trust: [t1, t2, t3]
-  Loyalty: [l1, l2, l3]
-
-# Define Directly Observed Variables (optional)
-observed: 
-  - Age
-  - Income
-
-# Define Structural Paths
-# Use (sig) to force Significance (p < 0.05)
-# Use (ns) to force Non-Significance
-paths:
-  - Trust -> Loyalty (sig)
-  - Age -> Loyalty (ns)
-  - Income -> Trust (sig)
-
-# Define Conrol Variables (optional)
-controls:
-  - Gender
-```
-
----
-
-## 🧪 Feature Demos & Samples
-
-### Demo A: The TAM2 Model (Complex)
-We have included a full **Technology Acceptance Model 2 (TAM2)** configuration. This model includes 9 Latent Variables and complex mediation.
-
-**Run it:**
+### 2. The Custom Job (Scaffolding)
+Too lazy to write YAML? I'll write it for you.
 ```bash
-python main.py run --config tam2.yaml
+python main.py catalog list
+# > lists cool models like UTAUT, TAM2, TPB
+
+python main.py catalog scaffold --model utaut
+# > writes utaut.yaml
 ```
+Now open `utaut.yaml` and change `PerfExpectancy` to `MyMadeUpVariable`.
 
-**What to look for:**
-1.  **Mediation Table**: Look at the output for "Indirect Effects". You will see chains like `SubjectiveNorm -> Image -> PU`.
-2.  **Report**: Open `results_report.md`. You will see text like:
-    > *"SubjectiveNorm mediates the relationship between Image and PU (Indirect Effect = 0.417, significant, p < 0.001)."*
-
-### Demo B: Hypothesis Testing
-Try `test_model.yaml` to see how we force specific p-values.
+### 3. The Full Send
 ```bash
-python main.py run --config test_model.yaml
+python main.py run --config utaut.yaml --overkill
 ```
-*Check the "Regression Coefficients" table to verify that `Age -> Loyalty` is indeed non-significant (`ns`).*
+Sit back, watch the progress bar spin, and collect your:
+- `results_report.md` (Your homework)
+- `path.png` (Your diagram)
+- `sem_interactive.html` (Your toy)
 
 ---
 
-## 📂 Project Structure
+## ⚖️ Disclaimer
+This tool generates **Synthetic Data**. If you submit this to a journal claiming it's real, that's on you. I'm just code. I can't be held ethically responsible for your desire to publish or perish.
 
-- `main.py`: CLI entry point. Configures the vibe.
-- `generator.py`: The simulation engine. Handles the logic for `sig`/`ns` paths and structural equations.
-- `analysis.py`: Wrap `semopy` and `factor_analyzer`. Contains the **Auto-Report** logic.
-- `visualizer.py`: Uses `graphviz` to draw the diagram.
-- `results_report.md`: The output file where your paper is written.
-- `path.png`: The visual output.
-
----
-
-## 🤝 Contributing
-
-Feel free to fork and add more intricate models (e.g. UTAUT, PLS-SEM styles). Code is vibe-checked and ready to ship.
-
----
-*Built with 💖 by the pilk-sem team.*
+*Built with 💅 by pilk.*

@@ -1,0 +1,13 @@
+sample_size: 400
+latents:
+  PerfExpectancy: [pe1, pe2, pe3, pe4]
+  EffortExpectancy: [ee1, ee2, ee3, ee4]
+  SocialInfluence: [si1, si2, si3]
+  FacilitatingCond: [fc1, fc2, fc3]
+  BehIntention: [bi1, bi2, bi3]
+  UseBehavior: [use1, use2, use3]
+observed: [Age, Gender, Experience, Voluntariness]
+paths: [PerfExpectancy -> BehIntention (sig), EffortExpectancy -> BehIntention (sig),
+  SocialInfluence -> BehIntention (sig), FacilitatingCond -> UseBehavior (sig), BehIntention
+    -> UseBehavior (sig), Age -> BehIntention (ns), Gender -> BehIntention (ns)]
+controls: []

@@ -1,0 +1,27 @@
+sample_size: 480
+latents:
+  LifeSatisfaction: [ls_contentment, ls_flow, ls_appreciation]
+  CodingProductivity: [cp_focus, cp_velocity, cp_bugless]
+  SocialFatigue: [sf_drain, sf_eyes, sf_mood]
+  Burnout: [bo_energy, bo_focus, bo_detachment]
+observed:
+  - CareerProgress
+  - CoffeeIntake
+  - SocialBattery
+  - MeetingsAttended
+  - HoursWorked
+  - GitHubCommits
+paths:
+  - CareerProgress -> LifeSatisfaction (sig)
+  - CodingProductivity -> LifeSatisfaction (sig)
+  - SocialFatigue -> LifeSatisfaction (sig)
+  - Burnout -> LifeSatisfaction (sig)
+  - CoffeeIntake -> CodingProductivity (sig)
+  - GitHubCommits -> CodingProductivity (sig)
+  - SocialBattery -> SocialFatigue (sig)
+  - MeetingsAttended -> SocialFatigue (sig)
+  - HoursWorked -> Burnout (sig)
+  - MeetingsAttended -> Burnout (ns)
+  - SocialBattery -> Burnout (ns)
+controls:
+  - TimeZonePing

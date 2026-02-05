@@ -1,14 +1,85 @@
-
 import graphviz
-from typing import Dict, List, Optional
+from pyvis.network import Network
+from typing import Dict, List, Tuple
+import os
 
 class Visualizer:
     def __init__(self, filename="path"):
         self.filename = filename
         
-    def generate_diagram(self, latents: Dict[str, List[str]], paths: List[str], stats=None):
+    def generate_interactive(self, latents: Dict[str, List[str]], paths: List[str], stats=None) -> str:
         """
-        Generates an AMOS-style path diagram.
+        Generates an interactive HTML path diagram using pyvis.
+        """
+        net = Network(height='750px', width='100%', bgcolor='#222222', font_color='white')
+        net.barnes_hut()
+        
+        # 1. Add Nodes
+        
+        # Latents
+        for lat in latents.keys():
+            net.add_node(lat, label=lat, title=lat, color='#ffcc00', shape='dot', size=30)
+            
+        # Indicators & Observed
+        # Identify observed variables from paths that are not latents
+        all_nodes = set()
+        for p in paths:
+             parts = p.split('->')
+             if len(parts) == 2:
+                 all_nodes.add(parts[0].strip())
+                 all_nodes.add(parts[1].strip())
+        
+        # Add indicators as nodes
+        for lat, indicators in latents.items():
+            for ind in indicators:
+                 net.add_node(ind, label=ind, title=f"Indicator of {lat}", color='#00ccff', shape='square', size=15)
+                 # Add measurement edge (grey)
+                 net.add_edge(lat, ind, color='grey', width=1)
+                 
+        # Add pure observed variables (structurals not in latents/indicators)
+        known_vars = set(latents.keys()) | {i for inds in latents.values() for i in inds}
+        observed_struct = all_nodes - known_vars
+        
+        for obs in observed_struct:
+            net.add_node(obs, label=obs, title=f"Observed: {obs}", color='#00ccff', shape='square', size=20)
+            
+        # 2. Add Structural Edges
+        # If stats present, use p-values for color
+        path_stat_map = {}
+        if stats is not None:
+            # Map (lhs, rhs) -> (est, pval)
+            # semopy: lval ~ rval
+            regs = stats[stats['op'] == '~']
+            for _, row in regs.iterrows():
+                path_stat_map[(row['rval'], row['lval'])] = (row['Estimate'], row['p-value'])
+
+        for p in paths:
+            if '->' not in p: continue
+            src, dst = [x.strip() for x in p.split('->')]
+            
+            color = 'white'
+            width = 2
+            title = "Path"
+            
+            if (src, dst) in path_stat_map:
+                est, pval = path_stat_map[(src, dst)]
+                try: p_val_f = float(pval)
+                except: p_val_f = 1.0
+                
+                is_sig = p_val_f < 0.05
+                color = '#00ff00' if is_sig else '#444444' # Green if sig, Dark Grey if ns
+                width = 1 + abs(est) * 3
+                title = f"Beta={est:.3f}, p={p_val_f:.3f}"
+            
+            net.add_edge(src, dst, color=color, width=width, title=title)
+            
+        output_file = "sem_interactive.html"
+        net.save_graph(output_file)
+        return output_file
+
+    def generate_diagram(self, latents: Dict[str, List[str]], paths: List[str], stats=None, output_formats=('png',)):
+        """
+        Generates an AMOS-style path diagram and exports to the requested formats.
         """
         dot = graphviz.Digraph(comment='SEM Path Diagram')
         dot.attr(rankdir='LR')
@@ -57,11 +128,15 @@ class Visualizer:
                 # Add disturbance for endogenous latent?
                 # Usually yes, but simplify for now.
         
-        # 4. Render
-        try:
-            dot.render(self.filename, format='png', cleanup=True)
-            return f"{self.filename}.png"
-        except graphviz.backend.ExecutableNotFound:
-            return "Error: Graphviz executable 'dot' not found. Please run 'brew install graphviz' or install it for your OS."
-        except Exception as e:
-            return f"Error visualizing: {e}"
+        # 5. Render to requested formats
+        diagrams = {}
+        for fmt in output_formats:
+            try:
+                rendered = dot.render(self.filename, format=fmt, cleanup=True)
+                diagrams[fmt] = rendered
+            except graphviz.backend.ExecutableNotFound:
+                diagrams[fmt] = "Error: Graphviz executable 'dot' not found. Please install graphviz."
+            except Exception as e:
+                diagrams[fmt] = f"Error visualizing ({fmt}): {e}"
+        
+        return diagrams
