@@ -3,3 +3,4 @@ __pycache__/
 *.png
 *.dot
 results_report.md
+*.html

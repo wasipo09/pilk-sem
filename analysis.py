@@ -237,7 +237,6 @@ class ModelAnalyzer:
              return None
 
         # Bootstrap Loop
-        # Note: We rely on the caller to handle the progress bar for vibe
         for i in range(n_boot):
             # Resample
             sample_df = self.df.sample(frac=1.0, replace=True)
@@ -254,7 +253,7 @@ class ModelAnalyzer:
                      iter_res[key] = row['Estimate']
                 boot_estimates.append(iter_res)
             except:
-                continue # Skip failed convergences
+                continue 
                 
         # Aggregate
         if not boot_estimates:
@@ -285,3 +284,155 @@ class ModelAnalyzer:
             })
             
         return pd.DataFrame(records)
+
+    def generate_html_report(self, stats: pd.DataFrame, fit: Any, reliability: Dict, mediation: List[Dict], image_path: str = None) -> str:
+        """
+        Generates a publication-ready HTML report with embedded image and tables.
+        """
+        import base64
+        
+        # 1. Styles
+        css = """
+        <style>
+            body { font-family: 'Times New Roman', Times, serif; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 20px; color: #000; }
+            h1 { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; }
+            h2 { border-bottom: 1px solid #ccc; padding-top: 20px; }
+            table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 0.9em; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+            th { background-color: #f2f2f2; font-weight: bold; }
+            .figure { text-align: center; margin: 30px 0; }
+            .figure img { max-width: 100%; border: 1px solid #eee; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+            .caption { font-style: italic; color: #666; margin-top: 8px; }
+            .note { font-size: 0.8em; color: #555; }
+        </style>
+        """
+        
+        # 2. Methodology
+        methodology = """
+        <h2>1. Methodology</h2>
+        <p>Structural Equation Modeling (SEM) was employed to test the proposed hypotheses. 
+        The analysis was conducted using Maximum Likelihood (ML) estimation. 
+        Model fit was assessed using standard indices: Comparative Fit Index (CFI), Tucker-Lewis Index (TLI), 
+        and Root Mean Square Error of Approximation (RMSEA). Thresholds of > 0.90 for CFI/TLI and < 0.08 for RMSEA 
+        were used to indicate acceptable model fit (Hu & Bentler, 1999).</p>
+        """
+        
+        # 3. Tables Generation
+        # Reliability Table
+        rel_html = ""
+        if reliability:
+            rel_rows = ""
+            for k, v in reliability.items():
+                verdict = "Acceptable" if v > 0.7 else "Low"
+                rel_rows += f"<tr><td style='text-align:left'>{k}</td><td>{v:.3f}</td><td>{verdict}</td></tr>"
+            rel_html = f"""
+            <h3>Reliability Analysis</h3>
+            <table>
+                <thead><tr><th style='text-align:left'>Latent Variable</th><th>Cronbach's Alpha</th><th>Verdict</th></tr></thead>
+                <tbody>{rel_rows}</tbody>
+            </table>
+            """
+
+        # Fit Table
+        fit_html = ""
+        if isinstance(fit, pd.DataFrame):
+            fit_rows = ""
+            for idx in ['CFI', 'TLI', 'RMSEA', 'Chi-Square', 'DoF', 'p-value']:
+                if idx in fit.columns:
+                    val = fit[idx].iloc[0]
+                    fit_rows += f"<tr><td>{idx}</td><td>{val:.4f}</td></tr>"
+            fit_html = f"""
+            <h3>Model Fit Indices</h3>
+            <table>
+                <thead><tr><th>Index</th><th>Value</th></tr></thead>
+                <tbody>{fit_rows}</tbody>
+            </table>
+            """
+            
+        # Coeff Table
+        coeff_html = ""
+        if isinstance(stats, pd.DataFrame):
+            reg = stats[stats['op'] == '~']
+            reg_rows = ""
+            for _, row in reg.iterrows():
+                try: pval = float(row['p-value'])
+                except: pval = 1.0
+                sig = "*" if pval < 0.05 else "ns"
+                p_disp = "< 0.001" if pval < 0.001 else f"{pval:.3f}"
+                
+                try: se = f"{float(row['Std. Err']):.3f}"
+                except: se = "-"
+                try: z = f"{float(row['z-value']):.3f}"
+                except: z = "-"
+                
+                reg_rows += f"<tr><td>{row['rval']} &rarr; {row['lval']}</td><td>{row['Estimate']:.3f}</td><td>{se}</td><td>{z}</td><td>{p_disp} {sig}</td></tr>"
+            
+            coeff_html = f"""
+            <h3>Path Coefficients</h3>
+            <table>
+                <thead><tr><th>Path</th><th>Estimate (&beta;)</th><th>S.E.</th><th>Z-Value</th><th>P-Value</th></tr></thead>
+                <tbody>{reg_rows}</tbody>
+            </table>
+            <p class='note'>* p < 0.05. ns = not significant.</p>
+            """
+            
+        # Mediation Table
+        med_html = ""
+        if mediation:
+            med_rows = ""
+            for m in mediation:
+                try: pval = float(m['P_Value'])
+                except: pval = 1.0
+                sig = "*" if pval < 0.05 else "ns"
+                p_disp = "< 0.001" if pval < 0.001 else f"{pval:.3f}"
+                med_rows += f"<tr><td>{m['IV']} &rarr; {m['Mediator']} &rarr; {m['DV']}</td><td>{m['Indirect_Effect']:.3f}</td><td>{p_disp} {sig}</td></tr>"
+            
+            med_html = f"""
+            <h3>Mediation Analysis (Indirect Effects)</h3>
+            <table>
+                <thead><tr><th>Mediation Chain</th><th>Indirect Effect</th><th>P-Value</th></tr></thead>
+                <tbody>{med_rows}</tbody>
+            </table>
+            """
+        
+        # 4. Image Embedding
+        img_html = ""
+        if image_path:
+            try:
+                with open(image_path, "rb") as image_file:
+                    encoded_string = base64.b64encode(image_file.read()).decode()
+                img_html = f"""
+                <div class="figure">
+                    <img src="data:image/png;base64,{encoded_string}" alt="Path Diagram">
+                    <div class="caption">Figure 1. Structural Equation Model results.</div>
+                </div>
+                """
+            except Exception as e:
+                img_html = f"<p><em>Could not embed image: {e}</em></p>"
+
+        # 5. Assembly
+        html = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>SEM Analysis Results</title>
+            {css}
+        </head>
+        <body>
+            <h1>Structural Equation Model Results</h1>
+            <p class='note' style='text-align:center'>Generated by Pilk-SEM Research Suite</p>
+            {img_html}
+            {methodology}
+            <h2>2. Results</h2>
+            {fit_html}
+            {rel_html}
+            {coeff_html}
+            {med_html}
+            <div style='margin-top:50px; border-top:1px solid #ccc; padding-top:10px; font-size:0.8em; text-align:center;'>
+                Report generated via <strong>pilk-sem</strong>. <br>
+                <em>Pilk Research Team (2026). Pilk-seml. GitHub: https://github.com/wasipo09/Pilk-sem</em>
+            </div>
+        </body>
+        </html>
+        """
+        return html

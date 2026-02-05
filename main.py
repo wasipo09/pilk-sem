@@ -268,7 +268,34 @@ def run(config, overkill):
         rprint(f"[green]★ Interactive graph saved to {interactive_file}[/green]")
         
     diagram_outputs = viz.generate_diagram(latents, paths_clean, stats=res['stats'])
-    # ... (print diagram outputs) ...
+    image_path = None
+    if isinstance(diagram_outputs, dict):
+        if 'png' in diagram_outputs:
+            image_path = diagram_outputs['png']
+        rendered_paths = ", ".join(f"{fmt.upper()}: {path}" for fmt, path in diagram_outputs.items())
+        rprint(f"[yellow]★ Path diagram saved to {rendered_paths}[/yellow]")
+    else:
+        image_path = str(diagram_outputs) if str(diagram_outputs).endswith('.png') else None
+        rprint(f"[yellow]★ Path diagram saved to {diagram_outputs}[/yellow]")
+    
+    # Generate Publication Ready HTML
+    rprint("\n[bold cyan]6. Publication Ready Export[/bold cyan]")
+    # prelim might not be defined if latents is empty, check first
+    reliability = prelim['reliability'] if latents and 'prelim' in locals() else {}
+    
+    html_report = analyzer.generate_html_report(
+        res['stats'],
+        res['fit_indices'],
+        reliability,
+        med_results if 'med_results' in locals() else [],
+        image_path=image_path
+    )
+    
+    with open("publication_ready.html", "w") as f:
+        f.write(html_report)
+    rprint(f"[green]✔ Full HTML report saved to [bold]publication_ready.html[/bold][/green]")
+    
+    rprint("\n[bold magenta]✨ Vibe Check Complete! ✨[/bold magenta]")
 
 import model_catalog
 
