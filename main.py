@@ -2,6 +2,7 @@
 import click
 import pandas as pd
 import numpy as np
+from pathlib import Path
 from rich.console import Console
 from rich.table import Table
 from rich import print as rprint
@@ -13,12 +14,19 @@ import copy
 
 console = Console()
 
-def run_optimization_pipeline(df, latent_map, prefix="", drama=None):
+def ensure_output_dir(output_dir):
+    """Create and return the directory used for generated artifacts."""
+    path = Path(output_dir)
+    path.mkdir(parents=True, exist_ok=True)
+    return path
+
+def run_optimization_pipeline(df, latent_map, prefix="", drama=None, output_dir="."):
     """
     Runs the data optimization pipeline: Raw -> EFA Cut -> Reliability Cut.
     Exports CSVs at each stage and tracks observables.
     Returns (final_df, final_latent_map).
     """
+    output_path = ensure_output_dir(output_dir)
     history = []
     
     # helper to count observables
@@ -27,7 +35,7 @@ def run_optimization_pipeline(df, latent_map, prefix="", drama=None):
 
     # 1. Raw Data
     step_name = "1_raw"
-    fname = f"{prefix}1_raw_data.csv"
+    fname = output_path / f"{prefix}1_raw_data.csv"
     df.to_csv(fname, index=False)
     n_obs = count_obs(latent_map)
     history.append({"Stage": "1. Raw Data", "Items": n_obs, "Action": "Saved CSV"})
@@ -56,7 +64,7 @@ def run_optimization_pipeline(df, latent_map, prefix="", drama=None):
         history.append({"Stage": "2. EFA Cut", "Items": n_obs, "Action": "No changes"})
         rprint("[green]EFA Scan Clean![/green]")
 
-    fname = f"{prefix}2_efa_cut_data.csv"
+    fname = output_path / f"{prefix}2_efa_cut_data.csv"
     current_df.to_csv(fname, index=False)
     rprint(f"[dim]Saved {fname}[/dim]")
 
@@ -78,7 +86,7 @@ def run_optimization_pipeline(df, latent_map, prefix="", drama=None):
         history.append({"Stage": "3. Reliability Cut", "Items": count_obs(current_map), "Action": "No changes"})
         rprint("[green]Reliability Scan Clean![/green]")
 
-    fname = f"{prefix}3_reliability_cut_data.csv"
+    fname = output_path / f"{prefix}3_reliability_cut_data.csv"
     current_df.to_csv(fname, index=False)
     rprint(f"[dim]Saved {fname}[/dim]")
         
@@ -106,9 +114,11 @@ def cli():
 @click.option('--n', default=200, help='Sample size')
 @click.option('--drama', is_flag=True, help='Enable Sentient Diary mode')
 @click.option('--panic', is_flag=True, help='Enable Panic Mode')
-def vibe(latents, indicators, n, drama, panic):
+@click.option('--output-dir', default='.', show_default=True, help='Directory for generated CSV, image, and report artifacts')
+def vibe(latents, indicators, n, drama, panic, output_dir):
     """Run a full SEM vibe check with synthetic data."""
     console.rule("[bold magenta]pilk-sem Vibe Check[/bold magenta]")
+    output_path = ensure_output_dir(output_dir)
     
     # 1. Define Model
     rprint("[yellow]⚡ Generating Vibe Data...[/yellow]")
@@ -136,7 +146,7 @@ def vibe(latents, indicators, n, drama, panic):
     
     # 2. Optimization Pipeline
     drama_logger = DramaLogger(enabled=drama)
-    df, latent_map = run_optimization_pipeline(df_raw, latent_map, drama=drama_logger)
+    df, latent_map = run_optimization_pipeline(df_raw, latent_map, drama=drama_logger, output_dir=output_path)
     
     # 3. Analyze Final Data
     analyzer = ModelAnalyzer(df, drama=drama_logger)
@@ -214,7 +224,7 @@ def vibe(latents, indicators, n, drama, panic):
     
     # 3. Visualization
     rprint("\n[bold cyan]3. Visualization[/bold cyan]")
-    viz = Visualizer(filename="path")
+    viz = Visualizer(filename="path", output_dir=output_path)
     diagram_outputs = viz.generate_diagram(latent_map, paths, stats=res['stats'])
     if isinstance(diagram_outputs, dict):
         rendered_paths = ", ".join(f"{fmt.upper()}: {path}" for fmt, path in diagram_outputs.items())
@@ -231,9 +241,11 @@ import yaml
 @click.option('--overkill', is_flag=True, help='Enable "Overkill" features (Physics Viz, Bootstrapping)')
 @click.option('--drama', is_flag=True, help='Enable Sentient Diary mode')
 @click.option('--panic', is_flag=True, help='Enable Panic Mode')
-def run(config, overkill, drama, panic):
+@click.option('--output-dir', default='.', show_default=True, help='Directory for generated CSV, image, and report artifacts')
+def run(config, overkill, drama, panic, output_dir):
     """Run a full SEM vibe check from a YAML config."""
     console.rule("[bold magenta]pilk-sem Advanced Run[/bold magenta]")
+    output_path = ensure_output_dir(output_dir)
     
     # ... (Keep existing loading logic up to analysis) ...
     # 1. Load Config
@@ -252,7 +264,7 @@ def run(config, overkill, drama, panic):
     # 2. Optimization Pipeline
     latents = conf.get('latents', {})
     drama_logger = DramaLogger(enabled=drama)
-    df, latents = run_optimization_pipeline(df_raw, latents, drama=drama_logger)
+    df, latents = run_optimization_pipeline(df_raw, latents, drama=drama_logger, output_dir=output_path)
     
     # 3. Analyze Final Data
     analyzer = ModelAnalyzer(df, drama=drama_logger)
@@ -387,7 +399,7 @@ def run(config, overkill, drama, panic):
 
     # Visualization
     rprint("\n[bold cyan]Vizualization[/bold cyan]")
-    viz = Visualizer(filename="path")
+    viz = Visualizer(filename="path", output_dir=output_path)
     
     if overkill:
         rprint("[yellow]Generating Interactive Physics Graph...[/yellow]")
@@ -418,9 +430,10 @@ def run(config, overkill, drama, panic):
         image_path=image_path
     )
     
-    with open("publication_ready.html", "w") as f:
+    html_report_path = output_path / "publication_ready.html"
+    with open(html_report_path, "w") as f:
         f.write(html_report)
-    rprint(f"[green]✔ Full HTML report saved to [bold]publication_ready.html[/bold][/green]")
+    rprint(f"[green]✔ Full HTML report saved to [bold]{html_report_path}[/bold][/green]")
     
     rprint("\n[bold magenta]✨ Vibe Check Complete! ✨[/bold magenta]")
 

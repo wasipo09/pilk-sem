@@ -2,10 +2,16 @@ import graphviz
 from pyvis.network import Network
 from typing import Dict, List, Tuple
 import os
+from pathlib import Path
 
 class Visualizer:
-    def __init__(self, filename="path"):
+    def __init__(self, filename="path", output_dir="."):
         self.filename = filename
+        self.output_dir = Path(output_dir)
+        self.output_dir.mkdir(parents=True, exist_ok=True)
+
+    def _output_path(self, name: str) -> str:
+        return str(self.output_dir / name)
         
     def generate_interactive(self, latents: Dict[str, List[str]], paths: List[str], stats=None) -> str:
         """
@@ -73,7 +79,7 @@ class Visualizer:
             
             net.add_edge(src, dst, color=color, width=width, title=title)
             
-        output_file = "sem_interactive.html"
+        output_file = self._output_path("sem_interactive.html")
         net.save_graph(output_file)
         return output_file
 
@@ -132,7 +138,7 @@ class Visualizer:
         diagrams = {}
         for fmt in output_formats:
             try:
-                rendered = dot.render(self.filename, format=fmt, cleanup=True)
+                rendered = dot.render(self._output_path(self.filename), format=fmt, cleanup=True)
                 diagrams[fmt] = rendered
             except graphviz.backend.ExecutableNotFound:
                 diagrams[fmt] = "Error: Graphviz executable 'dot' not found. Please install graphviz."

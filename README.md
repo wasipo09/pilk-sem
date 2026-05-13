@@ -118,9 +118,9 @@ Now open `utaut.yaml` and change `PerfExpectancy` to `MyMadeUpVariable`.
 
 ### 3. The Full Send
 ```bash
-python main.py run --config utaut.yaml --overkill
+python main.py run --config utaut.yaml --overkill --output-dir results/utaut
 ```
-Sit back, watch the progress bar spin, and collect your:
+Sit back, watch the progress bar spin, and collect your generated artifacts in the output directory:
 - `publication_ready.html` (Your career)
 - `results_report.md` (Your homework)
 - `sem_interactive.html` (Your toy)
