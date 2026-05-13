@@ -1,4 +1,5 @@
 
+import copy
 from typing import Dict, Any
 
 _MODELS = {
@@ -85,4 +86,5 @@ def list_models() -> Dict[str, str]:
     return {k: v["description"] for k, v in _MODELS.items()}
 
 def get_model_config(name: str) -> Dict[str, Any]:
-    return _MODELS.get(name, {}).get("config")
+    config = _MODELS.get(name, {}).get("config")
+    return copy.deepcopy(config) if config is not None else None
